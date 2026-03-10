@@ -1,0 +1,42 @@
+{
+  "name": "ai-student-policy-guidance",
+  "version": "0.1.0",
+  "description": "AI-Based Student Policy Guidance System for Higher Institutions - MSc Research Project",
+  "author": "Ediomo Titus <VPG/MSC/CSC/24/13314>",
+  "license": "UNLICENSED",
+  "private": false,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/ai-student-policy-guidance"
+  },
+  "keywords": [
+    "ai",
+    "education",
+    "policy-guidance",
+    "nlp",
+    "higher-education",
+    "nigeria",
+    "chatbot",
+    "rule-based-system",
+    "research"
+  ],
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "install:all": "npm install",
+    "dev": "concurrently \"npm:dev --workspace=apps/frontend\" \"npm:dev --workspace=apps/backend\"",
+    "build": "npm run build --workspace=apps/frontend && npm run build --workspace=apps/backend",
+    "test": "npm test --workspaces",
+    "lint": "npm run lint --workspaces"
+  },
+  "devDependencies": {
+    "@types/react-query": "^1.2.8",
+    "concurrently": "^8.2.0"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "^5.90.21",
+    "react-router-dom": "^7.13.1"
+  }
+}
