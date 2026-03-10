@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: backend
+    env: node
+    plan: free
+    buildCommand: npm install --workspace=apps/backend && npm run build --workspace=apps/backend
+    startCommand: npm run start --workspace=apps/backend
+    rootDir: apps/backend
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Add your other backend env vars here (DB, JWT, etc.)
+databases:
+  - name: postgres
+    plan: free
+    databaseName: policy_guidance_system
+    user: postgres
