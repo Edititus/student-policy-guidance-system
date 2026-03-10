@@ -14,4 +14,4 @@ databases:
   - name: postgres
     plan: free
     databaseName: policy_guidance_system
-    user: postgres
+    user: render

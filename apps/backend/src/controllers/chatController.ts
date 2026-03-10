@@ -106,9 +106,7 @@ export class ChatController {
     if (this.ragService.answerQueryStream) {
       await this.ragService.answerQueryStream(policyQuery, res)
     } else {
-      // Fallback: run non-streaming and emit as single token
       const response = await this.ragService.answerQuery(policyQuery)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const escalated = (response as any).requiresEscalation ?? response.escalated ?? false
       res.write(`data: ${JSON.stringify({ token: response.answer })}\n\n`)
       res.write(
@@ -117,11 +115,10 @@ export class ChatController {
           meta: {
             queryId: response.id,
             confidence: response.confidence,
-            // Strip sources when escalating — showing sources on "I don't know" is misleading
             sources: escalated ? [] : response.sources,
             requiresEscalation: escalated,
           },
-        })}\n\n`,
+        })}\n\n`
       )
       res.end()
     }
@@ -278,7 +275,10 @@ export class ChatController {
         }
       }
 
-      res.json({ success: true, data: { categories, policies: policyList, total: policies.length } })
+      res.json({
+        success: true,
+        data: { categories, policies: policyList, total: policies.length },
+      })
     } catch (error) {
       console.error('Error in getCategories:', error)
       res.status(500).json({ success: false, error: 'Failed to fetch categories' })
