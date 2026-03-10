@@ -177,12 +177,8 @@ export class PolicyController {
 
       processingTracker.updateJob(jobId, { status: 'embedding' })
 
-      // Derive title: prefer clean filename over OCR-extracted title (which can be garbage)
-      const filenameTitle = file.originalname.replace(/\.(pdf|docx|txt)$/i, '').trim()
-      // Only use parsed title if it looks meaningful (>5 chars, mostly letters/spaces)
-      const parsedTitle = parsedData.title || ''
-      const isMeaningfulTitle = parsedTitle.length > 5 && /^[a-zA-Z\s\-:,]+$/.test(parsedTitle)
-      const title = isMeaningfulTitle ? parsedTitle : filenameTitle
+      // Title is always the school's name
+      const title = schoolName
 
       // Create policy document in the format expected by databaseRagService
       const policyDocument = {
