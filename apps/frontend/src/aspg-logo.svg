@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 100" width="320" height="100">
+  <defs>
+    <linearGradient id="iconGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1FA27D"/>
+      <stop offset="100%" style="stop-color:#0D7A8A"/>
+    </linearGradient>
+    <linearGradient id="leafGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3ECFA8"/>
+      <stop offset="100%" style="stop-color:#1FA27D"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Icon Mark: Shield with leaf/path signal -->
+  <g transform="translate(12, 10)">
+    <!-- Shield shape -->
+    <path d="M38 4 L66 14 L66 42 Q66 62 38 76 Q10 62 10 42 L10 14 Z" fill="url(#iconGrad)" opacity="0.12"/>
+    <path d="M38 8 L63 17 L63 42 Q63 60 38 72 Q13 60 13 42 L13 17 Z" fill="none" stroke="url(#iconGrad)" stroke-width="2"/>
+
+    <!-- Inner checkmark / path node -->
+    <circle cx="27" cy="38" r="3.5" fill="url(#leafGrad)"/>
+    <circle cx="38" cy="28" r="3.5" fill="url(#leafGrad)"/>
+    <circle cx="49" cy="44" r="3.5" fill="url(#leafGrad)"/>
+    <polyline points="27,38 38,28 49,44" fill="none" stroke="url(#leafGrad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- Sprout line at bottom of shield -->
+    <line x1="38" y1="50" x2="38" y2="60" stroke="#1FA27D" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M38 57 Q44 52 46 56" fill="none" stroke="#1FA27D" stroke-width="1.5" stroke-linecap="round"/>
+  </g>
+
+  <!-- Wordmark -->
+  <text x="98" y="45" font-family="Georgia, 'Times New Roman', serif" font-size="22" font-weight="700" fill="#0D2B2E" letter-spacing="-0.5">ai-student</text>
+  <text x="98" y="68" font-family="'Courier New', monospace" font-size="12.5" fill="#1FA27D" letter-spacing="3" font-weight="400">POLICY GUIDANCE</text>
+
+  <!-- Thin accent line -->
+  <line x1="98" y1="52" x2="290" y2="52" stroke="#3ECFA8" stroke-width="0.8" opacity="0.4"/>
+</svg>

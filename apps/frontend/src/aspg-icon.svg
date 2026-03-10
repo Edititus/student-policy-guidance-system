@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" width="80" height="80">
+  <defs>
+    <linearGradient id="iconGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1FA27D"/>
+      <stop offset="100%" style="stop-color:#0D7A8A"/>
+    </linearGradient>
+    <linearGradient id="leafGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3ECFA8"/>
+      <stop offset="100%" style="stop-color:#1FA27D"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Shield shape -->
+  <path d="M40 6 L70 17 L70 46 Q70 68 40 82 Q10 68 10 46 L10 17 Z" fill="url(#iconGrad)" opacity="0.12"/>
+  <path d="M40 10 L66 20 L66 46 Q66 65 40 78 Q14 65 14 46 L14 20 Z" fill="none" stroke="url(#iconGrad)" stroke-width="2.5"/>
+
+  <!-- Inner checkmark / path nodes -->
+  <circle cx="28" cy="42" r="4.5" fill="url(#leafGrad)"/>
+  <circle cx="40" cy="30" r="4.5" fill="url(#leafGrad)"/>
+  <circle cx="52" cy="48" r="4.5" fill="url(#leafGrad)"/>
+  <polyline points="28,42 40,30 52,48" fill="none" stroke="url(#leafGrad)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Sprout line at bottom of shield -->
+  <line x1="40" y1="56" x2="40" y2="68" stroke="#1FA27D" stroke-width="2" stroke-linecap="round"/>
+  <path d="M40 64 Q48 58 51 63" fill="none" stroke="#1FA27D" stroke-width="2" stroke-linecap="round"/>
+</svg>
