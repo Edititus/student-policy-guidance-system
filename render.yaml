@@ -3,7 +3,7 @@ services:
     name: backend
     env: node
     plan: free
-    buildCommand: npm install --workspace=apps/backend && npm run build --workspace=apps/backend
+    buildCommand: npm install && npm run build --workspace=apps/backend
     startCommand: npm run start --workspace=apps/backend
     rootDir: apps/backend
     envVars:
