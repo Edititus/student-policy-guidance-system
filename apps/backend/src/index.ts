@@ -13,7 +13,7 @@ import schoolRoutes from './routes/schoolRoutes'
 import { DatabaseRAGService } from './services/databaseRagService'
 import { PolicyParserService } from './services/policyParserService'
 import { VectorService } from './services/vectorService'
-import { connectDatabase, syncDatabase } from './models'
+import { connectDatabase, syncDatabase, School } from './models'
 import seedDatabase from './scripts/seed'
 import { errorHandler } from './middleware/errorHandler'
 import DataRetentionService from './services/dataRetentionService'
@@ -116,9 +116,9 @@ const startServer = async () => {
     // Initialize pgvector for RAG service
     await ragService.initialize()
 
-    // Seed initial data (schools and users)
-    const shouldSeed = process.env.SEED_DATABASE === 'true' || process.argv.includes('--seed')
-    if (shouldSeed) {
+    // Seed initial data if the database is empty (idempotent — safe to run every deploy)
+    const schoolCount = await School.count()
+    if (schoolCount === 0 || process.env.SEED_DATABASE === 'true' || process.argv.includes('--seed')) {
       console.log('\n🌱 Seeding database...')
       await seedDatabase(false)
     }
