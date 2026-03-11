@@ -62,18 +62,70 @@ export const connectDatabase = async (): Promise<void> => {
   }
 }
 
-// Add any missing columns that can't be handled by plain sync
-const runMigrations = async (): Promise<void> => {
-  // Add school_id to users if the table exists but the column is missing
+// Rename a column only if the old name exists and the new name does not
+const renameColumnIfNeeded = async (table: string, from: string, to: string): Promise<void> => {
   await sequelize.query(`
     DO $$ BEGIN
-      IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'users')
-         AND NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'school_id')
-      THEN
-        ALTER TABLE users ADD COLUMN school_id VARCHAR(100);
+      IF EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name = '${table}' AND column_name = '${from}'
+      ) AND NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name = '${table}' AND column_name = '${to}'
+      ) THEN
+        ALTER TABLE "${table}" RENAME COLUMN "${from}" TO "${to}";
       END IF;
     END $$;
   `)
+}
+
+// Add a column only if it does not already exist
+const addColumnIfMissing = async (table: string, column: string, definition: string): Promise<void> => {
+  await sequelize.query(`
+    DO $$ BEGIN
+      IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = '${table}')
+         AND NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = '${table}' AND column_name = '${column}')
+      THEN
+        ALTER TABLE "${table}" ADD COLUMN "${column}" ${definition};
+      END IF;
+    END $$;
+  `)
+}
+
+// Migrate any camelCase columns (created before underscored:true) to snake_case
+const runMigrations = async (): Promise<void> => {
+  // users table
+  await renameColumnIfNeeded('users', 'schoolId',   'school_id')
+  await renameColumnIfNeeded('users', 'schoolName', 'school_name')
+  await renameColumnIfNeeded('users', 'schoolDomain','school_domain')
+  await renameColumnIfNeeded('users', 'studentId',  'student_id')
+  await renameColumnIfNeeded('users', 'lastLogin',  'last_login')
+  await renameColumnIfNeeded('users', 'createdAt',  'created_at')
+  await renameColumnIfNeeded('users', 'updatedAt',  'updated_at')
+  await addColumnIfMissing('users', 'school_id', 'VARCHAR(100)')
+
+  // schools table
+  await renameColumnIfNeeded('schools', 'contactEmail', 'contact_email')
+  await renameColumnIfNeeded('schools', 'createdAt',    'created_at')
+  await renameColumnIfNeeded('schools', 'updatedAt',    'updated_at')
+
+  // policies table
+  await renameColumnIfNeeded('policies', 'schoolId',    'school_id')
+  await renameColumnIfNeeded('policies', 'schoolName',  'school_name')
+  await renameColumnIfNeeded('policies', 'uploadedBy',  'uploaded_by')
+  await renameColumnIfNeeded('policies', 'effectiveDate','effective_date')
+  await renameColumnIfNeeded('policies', 'expiryDate',  'expiry_date')
+  await renameColumnIfNeeded('policies', 'createdAt',   'created_at')
+  await renameColumnIfNeeded('policies', 'updatedAt',   'updated_at')
+
+  // policy_embeddings table
+  await renameColumnIfNeeded('policy_embeddings', 'policyId',   'policy_id')
+  await renameColumnIfNeeded('policy_embeddings', 'chunkText',  'chunk_text')
+  await renameColumnIfNeeded('policy_embeddings', 'chunkIndex', 'chunk_index')
+  await renameColumnIfNeeded('policy_embeddings', 'schoolId',   'school_id')
+  await renameColumnIfNeeded('policy_embeddings', 'schoolName', 'school_name')
+  await renameColumnIfNeeded('policy_embeddings', 'createdAt',  'created_at')
+  await renameColumnIfNeeded('policy_embeddings', 'updatedAt',  'updated_at')
 }
 
 // Sync database (create tables if they don't exist)
