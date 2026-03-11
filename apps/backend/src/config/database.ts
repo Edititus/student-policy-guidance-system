@@ -18,6 +18,10 @@ if (process.env.DATABASE_URL && isProduction) {
         rejectUnauthorized: false,
       },
     },
+    define: {
+      timestamps: true,
+      underscored: true,
+    },
   })
 } else {
   sequelize = new Sequelize(
@@ -58,9 +62,24 @@ export const connectDatabase = async (): Promise<void> => {
   }
 }
 
+// Add any missing columns that can't be handled by plain sync
+const runMigrations = async (): Promise<void> => {
+  // Add school_id to users if the table exists but the column is missing
+  await sequelize.query(`
+    DO $$ BEGIN
+      IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'users')
+         AND NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'school_id')
+      THEN
+        ALTER TABLE users ADD COLUMN school_id VARCHAR(100);
+      END IF;
+    END $$;
+  `)
+}
+
 // Sync database (create tables if they don't exist)
 export const syncDatabase = async (force: boolean = false): Promise<void> => {
   try {
+    if (!force) await runMigrations()
     await sequelize.sync({ force })
     console.log('✅ Database synchronized')
   } catch (error) {
