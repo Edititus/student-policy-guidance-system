@@ -31,7 +31,7 @@ export class DataRetentionService {
         where: { createdAt: { [Op.lt]: cutoff } },
       }),
       AuditLog.destroy({
-        where: { 'created_at': { [Op.lt]: cutoff } },
+        where: { createdAt: { [Op.lt]: cutoff } },
       }),
     ])
 
