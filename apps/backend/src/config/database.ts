@@ -3,28 +3,46 @@ import dotenv from 'dotenv'
 
 dotenv.config()
 
-// Database connection configuration
-const sequelize = new Sequelize(
-  process.env.DB_NAME || 'policy_guidance_system',
-  process.env.DB_USERNAME || 'postgres',
-  process.env.DB_PASSWORD || '',
-  {
-    host: process.env.DB_HOST || '127.0.0.1',
-    port: parseInt(process.env.DB_PORT || '5432'),
+const isProduction = process.env.NODE_ENV === 'production'
+
+let sequelize: Sequelize
+
+if (process.env.DATABASE_URL && isProduction) {
+  sequelize = new Sequelize(process.env.DATABASE_URL, {
     dialect: 'postgres',
+    protocol: 'postgres',
     logging: process.env.DB_LOGGING === 'true' ? console.log : false,
-    pool: {
-      max: 10,
-      min: 0,
-      acquire: 30000,
-      idle: 10000,
+    dialectOptions: {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false,
+      },
     },
-    define: {
-      timestamps: true,
-      underscored: true, // Use snake_case for database columns
-    },
-  }
-)
+  })
+} else {
+  sequelize = new Sequelize(
+    process.env.DB_NAME || 'policy_guidance_system',
+    process.env.DB_USERNAME || 'postgres',
+    process.env.DB_PASSWORD || '',
+    {
+      host: process.env.DB_HOST || '127.0.0.1',
+      port: parseInt(process.env.DB_PORT || '5432'),
+      dialect: 'postgres',
+      logging: process.env.DB_LOGGING === 'true' ? console.log : false,
+      dialectOptions: {},
+      pool: {
+        max: 10,
+        min: 0,
+        acquire: 30000,
+        idle: 10000,
+      },
+      define: {
+        timestamps: true,
+        underscored: true,
+      },
+    }
+  )
+}
 
 // Test database connection
 export const connectDatabase = async (): Promise<void> => {
