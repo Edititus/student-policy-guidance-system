@@ -45,13 +45,14 @@ AuditLog.init(
     ipAddress: { type: DataTypes.STRING, allowNull: true, field: 'ip_address' },
     userAgent: { type: DataTypes.TEXT, allowNull: true, field: 'user_agent' },
     metadata: { type: DataTypes.JSONB, allowNull: true },
+    createdAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW, field: 'created_at' },
+    updatedAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW, field: 'updated_at' },
   },
   {
     sequelize,
     tableName: 'audit_logs',
     timestamps: true,
-    createdAt: 'created_at',
-    updatedAt: 'updated_at',
+    underscored: true,
   }
 )
 
