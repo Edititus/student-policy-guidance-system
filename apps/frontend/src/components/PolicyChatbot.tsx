@@ -300,8 +300,8 @@ export default function PolicyChatbot() {
             }
             setMessages((prev) =>
               prev.map((m) =>
-                m.id === assistantId ? { ...m, content: m.content + payload.token } : m,
-              ),
+                m.id === assistantId ? { ...m, content: m.content + payload.token } : m
+              )
             )
           }
 
@@ -319,8 +319,8 @@ export default function PolicyChatbot() {
                       isEscalated: !!requiresEscalation,
                       adminResolved: false,
                     }
-                  : m,
-              ),
+                  : m
+              )
             )
             setIsLoading(false)
             if (!activeConversationId) {
@@ -349,7 +349,7 @@ export default function PolicyChatbot() {
               error instanceof Error ? error.message : 'Failed to connect to server'
             }`,
             timestamp: new Date(),
-          }),
+          })
       )
     } finally {
       setIsLoading(false)
@@ -392,11 +392,21 @@ export default function PolicyChatbot() {
 
   return (
     <div className="min-h-screen bg-smoke flex">
+      {/* Mobile overlay backdrop */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/40 z-40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* ── Collapsible left sidebar ── */}
       <aside
-        className={`${
-          sidebarOpen ? 'w-64' : 'w-0 overflow-hidden'
-        } transition-all duration-200 bg-white border-r border-gray-200 flex flex-col shrink-0`}
+        className={`
+          fixed inset-y-0 left-0 z-50 lg:relative lg:z-auto
+          ${sidebarOpen ? 'translate-x-0 lg:w-64' : '-translate-x-full lg:translate-x-0 lg:w-0 lg:overflow-hidden'}
+          w-64 transition-all duration-200 bg-white border-r border-gray-200 flex flex-col shrink-0
+        `}
       >
         <div className="p-4 border-b border-gray-100 flex items-center justify-between">
           <span className="font-semibold text-teal-deep text-sm">Conversations</span>
@@ -417,7 +427,10 @@ export default function PolicyChatbot() {
             conversations.map((conv) => (
               <button
                 key={conv.conversationId}
-                onClick={() => selectConversation(conv.conversationId)}
+                onClick={() => {
+                  selectConversation(conv.conversationId)
+                  if (window.innerWidth < 1024) setSidebarOpen(false)
+                }}
                 className={`w-full text-left px-4 py-3 text-sm border-b border-gray-50 hover:bg-teal-mist/30 transition-colors truncate ${
                   activeConversationId === conv.conversationId
                     ? 'bg-teal-mist text-teal-deep font-medium'

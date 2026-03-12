@@ -3,30 +3,30 @@
  * Sidebar + header, tab-based navigation similar to AdminDashboardRefactored
  */
 
-import React, { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { Icon } from '../../components/atoms';
-import type { IconName } from '../../components/atoms';
-import { useAuth } from '../../context/AuthContext';
-import { usePlatformStats } from '../../hooks/useSuperAdmin';
-import PlatformOverviewPage from './PlatformOverviewPage';
-import AdminManagementPage from './AdminManagementPage';
-import SchoolManagementPage from './SchoolManagementPage';
-import SystemSettingsPage from './SystemSettingsPage';
-import aspgIcon from '../../aspg-icon.svg';
+import React, { useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
+import { Icon } from '../../components/atoms'
+import type { IconName } from '../../components/atoms'
+import { useAuth } from '../../context/AuthContext'
+import { usePlatformStats } from '../../hooks/useSuperAdmin'
+import PlatformOverviewPage from './PlatformOverviewPage'
+import AdminManagementPage from './AdminManagementPage'
+import SchoolManagementPage from './SchoolManagementPage'
+import SystemSettingsPage from './SystemSettingsPage'
+import aspgIcon from '../../aspg-icon.svg'
 
-type SuperAdminTab = 'overview' | 'admins' | 'schools' | 'settings';
+type SuperAdminTab = 'overview' | 'admins' | 'schools' | 'settings'
 
-const ALLOWED_TABS: SuperAdminTab[] = ['overview', 'admins', 'schools', 'settings'];
+const ALLOWED_TABS: SuperAdminTab[] = ['overview', 'admins', 'schools', 'settings']
 
 function coerceTab(value?: string): SuperAdminTab {
-  return ALLOWED_TABS.includes(value as SuperAdminTab) ? (value as SuperAdminTab) : 'overview';
+  return ALLOWED_TABS.includes(value as SuperAdminTab) ? (value as SuperAdminTab) : 'overview'
 }
 
 interface INavItem {
-  id: SuperAdminTab;
-  label: string;
-  iconName: IconName;
+  id: SuperAdminTab
+  label: string
+  iconName: IconName
 }
 
 const navItems: INavItem[] = [
@@ -34,27 +34,42 @@ const navItems: INavItem[] = [
   { id: 'admins', label: 'Admin Management', iconName: 'users' },
   { id: 'schools', label: 'Schools', iconName: 'folder' },
   { id: 'settings', label: 'System Settings', iconName: 'cog' },
-];
+]
 
 const SuperAdminDashboard: React.FC = () => {
-  const navigate = useNavigate();
-  const { tab } = useParams<{ tab: string }>();
-  const activeTab = coerceTab(tab);
-  const { user, logout } = useAuth();
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const navigate = useNavigate()
+  const { tab } = useParams<{ tab: string }>()
+  const activeTab = coerceTab(tab)
+  const { user, logout } = useAuth()
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
 
-  const { data: statsData, isLoading: statsLoading } = usePlatformStats();
-  const stats = statsData?.data || null;
+  const { data: statsData, isLoading: statsLoading } = usePlatformStats()
+  const stats = statsData?.data || null
 
   const onTabChange = (nextTab: SuperAdminTab) => {
-    navigate(`/platform/${nextTab}`);
-  };
+    navigate(`/platform/${nextTab}`)
+    setMobileSidebarOpen(false)
+  }
 
   return (
     <div className="min-h-screen bg-smoke flex">
+      {/* Mobile overlay backdrop */}
+      {mobileSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/40 z-40 lg:hidden"
+          onClick={() => setMobileSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
       <aside
-        className={`${sidebarCollapsed ? 'w-20' : 'w-64'} bg-gray-900 flex-shrink-0 transition-all duration-300`}
+        className={`
+          fixed inset-y-0 left-0 z-50 lg:relative lg:z-auto
+          ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0
+          ${sidebarCollapsed ? 'lg:w-20' : 'lg:w-64'} w-64
+          bg-gray-900 flex-shrink-0 transition-all duration-300
+        `}
       >
         <div className="flex flex-col h-full">
           {/* Logo */}
@@ -107,17 +122,27 @@ const SuperAdminDashboard: React.FC = () => {
       {/* Main Content */}
       <div className="flex-1 min-w-0">
         {/* Header */}
-        <header className="sticky top-0 z-30 bg-white shadow-sm border-b border-gray-200 px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-lg font-semibold text-teal-deep capitalize">
+        <header className="sticky top-0 z-30 bg-white shadow-sm border-b border-gray-200 px-4 sm:px-6 py-4">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 min-w-0">
+              {/* Hamburger — mobile only */}
+              <button
+                onClick={() => setMobileSidebarOpen(true)}
+                className="lg:hidden p-1.5 rounded-lg hover:bg-gray-100 transition-colors shrink-0"
+                aria-label="Open navigation"
+              >
+                <Icon name="menu" size={22} className="text-slate" />
+              </button>
+              <h2 className="text-base sm:text-lg font-semibold text-teal-deep truncate">
                 {navItems.find((n) => n.id === activeTab)?.label || 'Super Admin'}
               </h2>
             </div>
-            <div className="flex items-center space-x-4">
-              <div className="text-right">
-                <div className="text-sm font-medium text-teal-deep">{user?.name || 'Super Admin'}</div>
-                <div className="text-xs text-slate">{user?.email}</div>
+            <div className="flex items-center gap-3 shrink-0">
+              <div className="text-right hidden sm:block">
+                <div className="text-sm font-medium text-teal-deep truncate max-w-[150px]">
+                  {user?.name || 'Super Admin'}
+                </div>
+                <div className="text-xs text-slate truncate max-w-[150px]">{user?.email}</div>
               </div>
               <button
                 onClick={logout}
@@ -141,7 +166,7 @@ const SuperAdminDashboard: React.FC = () => {
         </main>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default SuperAdminDashboard;
+export default SuperAdminDashboard

@@ -145,14 +145,14 @@ const StudentsPage: React.FC = () => {
   return (
     <div>
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-wrap items-start justify-between gap-3 mb-6">
         <div>
-          <h1 className="text-2xl font-semibold text-teal-deep">Student Management</h1>
-          <p className="text-slate mt-1">Manage student registrations and accounts</p>
+          <h1 className="text-xl sm:text-2xl font-semibold text-teal-deep">Student Management</h1>
+          <p className="text-slate mt-1 text-sm">Manage student registrations and accounts</p>
         </div>
         <button
           onClick={() => setShowCreateModal(true)}
-          className="flex items-center space-x-2 px-4 py-2.5 bg-teal-primary text-white rounded-xl hover:bg-ocean-deep transition-colors"
+          className="flex items-center space-x-2 px-4 py-2.5 bg-teal-primary text-white rounded-xl hover:bg-ocean-deep transition-colors shrink-0"
         >
           <Icon name="plus" size={18} />
           <span>Create Student</span>
@@ -187,7 +187,7 @@ const StudentsPage: React.FC = () => {
         ))}
       </div>
 
-      {/* Student Table */}
+      {/* Student List */}
       {isLoading ? (
         <div className="flex items-center justify-center py-12">
           <Icon name="spinner" size={24} className="text-teal-primary" />
@@ -201,121 +201,216 @@ const StudentsPage: React.FC = () => {
           </p>
         </div>
       ) : (
-        <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
-          <table className="w-full">
-            <thead>
-              <tr className="bg-gray-50 border-b border-gray-200">
-                <th className="text-left px-6 py-3 text-xs font-semibold text-slate uppercase tracking-wider">
-                  Name
-                </th>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-slate uppercase tracking-wider">
-                  Email
-                </th>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-slate uppercase tracking-wider">
-                  School
-                </th>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-slate uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-slate uppercase tracking-wider">
-                  Date
-                </th>
-                <th className="text-right px-6 py-3 text-xs font-semibold text-slate uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {displayStudents.map((student) => (
-                <tr key={student.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4">
-                    <div className="font-medium text-teal-deep">{student.name}</div>
+        <>
+          {/* Mobile: card layout (< md) */}
+          <div className="md:hidden space-y-3">
+            {displayStudents.map((student) => (
+              <div
+                key={student.id}
+                className="bg-white rounded-2xl border border-gray-200 p-4 space-y-3"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <div className="font-medium text-teal-deep truncate">{student.name}</div>
                     {student.department && (
                       <div className="text-xs text-slate mt-0.5">{student.department}</div>
                     )}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-slate">{student.email}</td>
-                  <td className="px-6 py-4 text-sm text-slate">
-                    {student.schoolName || student.schoolId || '—'}
-                  </td>
-                  <td className="px-6 py-4">
-                    <span
-                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        student.status === 'active'
-                          ? 'bg-green-100 text-green-700'
-                          : student.status === 'pending_approval'
-                            ? 'bg-amber-100 text-amber-700'
-                            : student.status === 'suspended'
-                              ? 'bg-red-100 text-red-700'
-                              : student.status === 'rejected'
-                                ? 'bg-gray-100 text-gray-700'
-                                : 'bg-gray-100 text-gray-600'
-                      }`}
+                    <div className="text-sm text-slate mt-1 truncate">{student.email}</div>
+                  </div>
+                  <span
+                    className={`shrink-0 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                      student.status === 'active'
+                        ? 'bg-green-100 text-green-700'
+                        : student.status === 'pending_approval'
+                          ? 'bg-amber-100 text-amber-700'
+                          : student.status === 'suspended'
+                            ? 'bg-red-100 text-red-700'
+                            : student.status === 'rejected'
+                              ? 'bg-gray-100 text-gray-700'
+                              : 'bg-gray-100 text-gray-600'
+                    }`}
+                  >
+                    {student.status === 'pending_approval'
+                      ? 'Pending'
+                      : student.status
+                        ? student.status.charAt(0).toUpperCase() + student.status.slice(1)
+                        : 'Unknown'}
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-2 text-xs text-slate">
+                  <span>{student.schoolName || student.schoolId || '—'}</span>
+                  {student.createdAt && <span>· {formatDate(student.createdAt)}</span>}
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {student.status === 'pending_approval' && (
+                    <>
+                      <button
+                        onClick={() => handleApprove(student.id as number)}
+                        disabled={approveMutation.isPending}
+                        className="px-3 py-1.5 text-xs font-medium bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors disabled:opacity-50"
+                      >
+                        Approve
+                      </button>
+                      <button
+                        onClick={() => handleReject(student.id as number)}
+                        disabled={rejectMutation.isPending}
+                        className="px-3 py-1.5 text-xs font-medium bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors disabled:opacity-50"
+                      >
+                        Reject
+                      </button>
+                    </>
+                  )}
+                  {student.status === 'active' && (
+                    <>
+                      <button
+                        onClick={() => handleSuspend(student.id as number)}
+                        disabled={updateStatusMutation.isPending}
+                        className="px-3 py-1.5 text-xs font-medium bg-amber-50 text-amber-700 rounded-lg hover:bg-amber-100 transition-colors disabled:opacity-50"
+                      >
+                        Suspend
+                      </button>
+                      <button
+                        onClick={() => handleResetPassword(student.id as number)}
+                        disabled={resetPasswordMutation.isPending}
+                        className="px-3 py-1.5 text-xs font-medium bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors disabled:opacity-50"
+                      >
+                        Reset PW
+                      </button>
+                    </>
+                  )}
+                  {student.status === 'suspended' && (
+                    <button
+                      onClick={() => handleReactivate(student.id as number)}
+                      disabled={updateStatusMutation.isPending}
+                      className="px-3 py-1.5 text-xs font-medium bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors disabled:opacity-50"
                     >
-                      {student.status === 'pending_approval'
-                        ? 'Pending'
-                        : student.status
-                          ? student.status.charAt(0).toUpperCase() + student.status.slice(1)
-                          : 'Unknown'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-slate">
-                    {student.createdAt ? formatDate(student.createdAt) : '—'}
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <div className="flex items-center justify-end space-x-2">
-                      {student.status === 'pending_approval' && (
-                        <>
-                          <button
-                            onClick={() => handleApprove(student.id as number)}
-                            disabled={approveMutation.isPending}
-                            className="px-3 py-1.5 text-xs font-medium bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors disabled:opacity-50"
-                          >
-                            Approve
-                          </button>
-                          <button
-                            onClick={() => handleReject(student.id as number)}
-                            disabled={rejectMutation.isPending}
-                            className="px-3 py-1.5 text-xs font-medium bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors disabled:opacity-50"
-                          >
-                            Reject
-                          </button>
-                        </>
-                      )}
-                      {student.status === 'active' && (
-                        <>
-                          <button
-                            onClick={() => handleSuspend(student.id as number)}
-                            disabled={updateStatusMutation.isPending}
-                            className="px-3 py-1.5 text-xs font-medium bg-amber-50 text-amber-700 rounded-lg hover:bg-amber-100 transition-colors disabled:opacity-50"
-                          >
-                            Suspend
-                          </button>
-                          <button
-                            onClick={() => handleResetPassword(student.id as number)}
-                            disabled={resetPasswordMutation.isPending}
-                            className="px-3 py-1.5 text-xs font-medium bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors disabled:opacity-50"
-                          >
-                            Reset PW
-                          </button>
-                        </>
-                      )}
-                      {student.status === 'suspended' && (
-                        <button
-                          onClick={() => handleReactivate(student.id as number)}
-                          disabled={updateStatusMutation.isPending}
-                          className="px-3 py-1.5 text-xs font-medium bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors disabled:opacity-50"
+                      Reactivate
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Tablet+: scrollable table (>= md) */}
+          <div className="hidden md:block bg-white rounded-2xl border border-gray-200 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[640px]">
+                <thead>
+                  <tr className="bg-gray-50 border-b border-gray-200">
+                    <th className="text-left px-4 lg:px-6 py-3 text-xs font-semibold text-slate uppercase tracking-wider">
+                      Name
+                    </th>
+                    <th className="text-left px-4 lg:px-6 py-3 text-xs font-semibold text-slate uppercase tracking-wider">
+                      Email
+                    </th>
+                    <th className="text-left px-4 lg:px-6 py-3 text-xs font-semibold text-slate uppercase tracking-wider">
+                      School
+                    </th>
+                    <th className="text-left px-4 lg:px-6 py-3 text-xs font-semibold text-slate uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th className="text-left px-4 lg:px-6 py-3 text-xs font-semibold text-slate uppercase tracking-wider">
+                      Date
+                    </th>
+                    <th className="text-right px-4 lg:px-6 py-3 text-xs font-semibold text-slate uppercase tracking-wider">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {displayStudents.map((student) => (
+                    <tr key={student.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-4 lg:px-6 py-4">
+                        <div className="font-medium text-teal-deep">{student.name}</div>
+                        {student.department && (
+                          <div className="text-xs text-slate mt-0.5">{student.department}</div>
+                        )}
+                      </td>
+                      <td className="px-4 lg:px-6 py-4 text-sm text-slate">{student.email}</td>
+                      <td className="px-4 lg:px-6 py-4 text-sm text-slate">
+                        {student.schoolName || student.schoolId || '—'}
+                      </td>
+                      <td className="px-4 lg:px-6 py-4">
+                        <span
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                            student.status === 'active'
+                              ? 'bg-green-100 text-green-700'
+                              : student.status === 'pending_approval'
+                                ? 'bg-amber-100 text-amber-700'
+                                : student.status === 'suspended'
+                                  ? 'bg-red-100 text-red-700'
+                                  : student.status === 'rejected'
+                                    ? 'bg-gray-100 text-gray-700'
+                                    : 'bg-gray-100 text-gray-600'
+                          }`}
                         >
-                          Reactivate
-                        </button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                          {student.status === 'pending_approval'
+                            ? 'Pending'
+                            : student.status
+                              ? student.status.charAt(0).toUpperCase() + student.status.slice(1)
+                              : 'Unknown'}
+                        </span>
+                      </td>
+                      <td className="px-4 lg:px-6 py-4 text-sm text-slate">
+                        {student.createdAt ? formatDate(student.createdAt) : '—'}
+                      </td>
+                      <td className="px-4 lg:px-6 py-4 text-right">
+                        <div className="flex items-center justify-end space-x-2">
+                          {student.status === 'pending_approval' && (
+                            <>
+                              <button
+                                onClick={() => handleApprove(student.id as number)}
+                                disabled={approveMutation.isPending}
+                                className="px-3 py-1.5 text-xs font-medium bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors disabled:opacity-50"
+                              >
+                                Approve
+                              </button>
+                              <button
+                                onClick={() => handleReject(student.id as number)}
+                                disabled={rejectMutation.isPending}
+                                className="px-3 py-1.5 text-xs font-medium bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors disabled:opacity-50"
+                              >
+                                Reject
+                              </button>
+                            </>
+                          )}
+                          {student.status === 'active' && (
+                            <>
+                              <button
+                                onClick={() => handleSuspend(student.id as number)}
+                                disabled={updateStatusMutation.isPending}
+                                className="px-3 py-1.5 text-xs font-medium bg-amber-50 text-amber-700 rounded-lg hover:bg-amber-100 transition-colors disabled:opacity-50"
+                              >
+                                Suspend
+                              </button>
+                              <button
+                                onClick={() => handleResetPassword(student.id as number)}
+                                disabled={resetPasswordMutation.isPending}
+                                className="px-3 py-1.5 text-xs font-medium bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors disabled:opacity-50"
+                              >
+                                Reset PW
+                              </button>
+                            </>
+                          )}
+                          {student.status === 'suspended' && (
+                            <button
+                              onClick={() => handleReactivate(student.id as number)}
+                              disabled={updateStatusMutation.isPending}
+                              className="px-3 py-1.5 text-xs font-medium bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors disabled:opacity-50"
+                            >
+                              Reactivate
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
       )}
 
       {/* Reset Password Result Modal */}

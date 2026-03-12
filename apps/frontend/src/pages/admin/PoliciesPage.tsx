@@ -3,37 +3,37 @@
  * Display and manage policy library
  */
 
-import React, { useState } from 'react';
-import type { IPolicy } from '../../types';
-import { Card, Badge, Button, Spinner, Icon, Input } from '../../components/atoms';
+import React, { useState } from 'react'
+import type { IPolicy } from '../../types'
+import { Card, Badge, Button, Spinner, Icon, Input } from '../../components/atoms'
 
 export interface UploadStatus {
-  progress: number;
-  stage: 'idle' | 'uploading' | 'parsing' | 'processing' | 'complete' | 'error';
-  message: string;
-  fileName?: string;
+  progress: number
+  stage: 'idle' | 'uploading' | 'parsing' | 'processing' | 'complete' | 'error'
+  message: string
+  fileName?: string
 }
 
 export interface CoverageGap {
-  intent: string;
-  sampleQuery: string;
-  count: number;
+  intent: string
+  sampleQuery: string
+  count: number
 }
 
 interface IPoliciesPageProps {
-  policies: IPolicy[];
-  isLoading?: boolean;
-  onFileUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  onActivatePolicy: (policyId: number) => Promise<void>;
-  onDeactivatePolicy?: (policyId: number) => Promise<void>;
-  onUpdatePolicy?: (policyId: number, data: { title?: string; category?: string }) => Promise<void>;
-  onDeletePolicy?: (policyId: number) => Promise<void>;
-  isUploading?: boolean;
-  uploadStatus?: UploadStatus;
-  coverageGaps?: CoverageGap[];
+  policies: IPolicy[]
+  isLoading?: boolean
+  onFileUpload: (event: React.ChangeEvent<HTMLInputElement>) => void
+  onActivatePolicy: (policyId: number) => Promise<void>
+  onDeactivatePolicy?: (policyId: number) => Promise<void>
+  onUpdatePolicy?: (policyId: number, data: { title?: string; category?: string }) => Promise<void>
+  onDeletePolicy?: (policyId: number) => Promise<void>
+  isUploading?: boolean
+  uploadStatus?: UploadStatus
+  coverageGaps?: CoverageGap[]
 }
 
-const CATEGORIES = ['ACADEMIC', 'ADMINISTRATIVE', 'FINANCIAL', 'STUDENT_AFFAIRS', 'GENERAL'];
+const CATEGORIES = ['ACADEMIC', 'ADMINISTRATIVE', 'FINANCIAL', 'STUDENT_AFFAIRS', 'GENERAL']
 
 const PoliciesPage: React.FC<IPoliciesPageProps> = ({
   policies,
@@ -47,64 +47,76 @@ const PoliciesPage: React.FC<IPoliciesPageProps> = ({
   uploadStatus = { progress: 0, stage: 'idle', message: '' },
   coverageGaps = [],
 }) => {
-  const [editingPolicy, setEditingPolicy] = useState<IPolicy | null>(null);
-  const [editTitle, setEditTitle] = useState('');
-  const [editCategory, setEditCategory] = useState('');
-  const [isSaving, setIsSaving] = useState(false);
-  const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
+  const [editingPolicy, setEditingPolicy] = useState<IPolicy | null>(null)
+  const [editTitle, setEditTitle] = useState('')
+  const [editCategory, setEditCategory] = useState('')
+  const [isSaving, setIsSaving] = useState(false)
+  const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null)
 
   const handleEdit = (policy: IPolicy) => {
-    setEditingPolicy(policy);
-    setEditTitle(policy.title);
-    setEditCategory(policy.category);
-  };
+    setEditingPolicy(policy)
+    setEditTitle(policy.title)
+    setEditCategory(policy.category)
+  }
 
   const handleSave = async () => {
-    if (!editingPolicy || !onUpdatePolicy) return;
-    setIsSaving(true);
+    if (!editingPolicy || !onUpdatePolicy) return
+    setIsSaving(true)
     try {
-      await onUpdatePolicy(editingPolicy.id, { title: editTitle, category: editCategory });
-      setEditingPolicy(null);
+      await onUpdatePolicy(editingPolicy.id, { title: editTitle, category: editCategory })
+      setEditingPolicy(null)
     } finally {
-      setIsSaving(false);
+      setIsSaving(false)
     }
-  };
+  }
 
   const handleDelete = async (policyId: number) => {
-    if (!onDeletePolicy) return;
-    await onDeletePolicy(policyId);
-    setDeleteConfirm(null);
-  };
+    if (!onDeletePolicy) return
+    await onDeletePolicy(policyId)
+    setDeleteConfirm(null)
+  }
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-20">
         <Spinner size="lg" label="Loading policies..." />
       </div>
-    );
+    )
   }
 
   const getStageColor = (stage: UploadStatus['stage']) => {
     switch (stage) {
-      case 'uploading': return 'bg-blue-500';
-      case 'parsing': return 'bg-yellow-500';
-      case 'processing': return 'bg-purple-500';
-      case 'complete': return 'bg-green-500';
-      case 'error': return 'bg-red-500';
-      default: return 'bg-teal-primary';
+      case 'uploading':
+        return 'bg-blue-500'
+      case 'parsing':
+        return 'bg-yellow-500'
+      case 'processing':
+        return 'bg-purple-500'
+      case 'complete':
+        return 'bg-green-500'
+      case 'error':
+        return 'bg-red-500'
+      default:
+        return 'bg-teal-primary'
     }
-  };
+  }
 
   const getStageIcon = (stage: UploadStatus['stage']) => {
     switch (stage) {
-      case 'uploading': return 'upload';
-      case 'parsing': return 'document-text';
-      case 'processing': return 'refresh';
-      case 'complete': return 'check-circle';
-      case 'error': return 'exclamation-circle';
-      default: return 'plus';
+      case 'uploading':
+        return 'upload'
+      case 'parsing':
+        return 'document-text'
+      case 'processing':
+        return 'refresh'
+      case 'complete':
+        return 'check-circle'
+      case 'error':
+        return 'exclamation-circle'
+      default:
+        return 'plus'
     }
-  };
+  }
 
   return (
     <div className="space-y-6">
@@ -114,11 +126,17 @@ const PoliciesPage: React.FC<IPoliciesPageProps> = ({
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${getStageColor(uploadStatus.stage)}`}>
+                <div
+                  className={`w-10 h-10 rounded-full flex items-center justify-center ${getStageColor(uploadStatus.stage)}`}
+                >
                   {uploadStatus.stage === 'processing' || uploadStatus.stage === 'parsing' ? (
                     <Spinner size="sm" />
                   ) : (
-                    <Icon name={getStageIcon(uploadStatus.stage)} size={20} className="text-white" />
+                    <Icon
+                      name={getStageIcon(uploadStatus.stage)}
+                      size={20}
+                      className="text-white"
+                    />
                   )}
                 </div>
                 <div>
@@ -128,31 +146,37 @@ const PoliciesPage: React.FC<IPoliciesPageProps> = ({
                   <p className="text-sm text-slate">{uploadStatus.message}</p>
                 </div>
               </div>
-              <span className="text-lg font-bold text-teal-primary">
-                {uploadStatus.progress}%
-              </span>
+              <span className="text-lg font-bold text-teal-primary">{uploadStatus.progress}%</span>
             </div>
-            
+
             {/* Progress Bar */}
             <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
-              <div 
+              <div
                 className={`h-full rounded-full transition-all duration-500 ${getStageColor(uploadStatus.stage)}`}
                 style={{ width: `${uploadStatus.progress}%` }}
               />
             </div>
-            
+
             {/* Stage Indicators */}
             <div className="flex justify-between text-xs text-slate">
-              <span className={uploadStatus.stage === 'uploading' ? 'text-blue-600 font-medium' : ''}>
+              <span
+                className={uploadStatus.stage === 'uploading' ? 'text-blue-600 font-medium' : ''}
+              >
                 Upload
               </span>
-              <span className={uploadStatus.stage === 'parsing' ? 'text-yellow-600 font-medium' : ''}>
+              <span
+                className={uploadStatus.stage === 'parsing' ? 'text-yellow-600 font-medium' : ''}
+              >
                 Parse PDF
               </span>
-              <span className={uploadStatus.stage === 'processing' ? 'text-purple-600 font-medium' : ''}>
+              <span
+                className={uploadStatus.stage === 'processing' ? 'text-purple-600 font-medium' : ''}
+              >
                 Generate Embeddings
               </span>
-              <span className={uploadStatus.stage === 'complete' ? 'text-green-600 font-medium' : ''}>
+              <span
+                className={uploadStatus.stage === 'complete' ? 'text-green-600 font-medium' : ''}
+              >
                 Complete
               </span>
             </div>
@@ -193,17 +217,23 @@ const PoliciesPage: React.FC<IPoliciesPageProps> = ({
       )}
 
       <Card variant="outlined" padding="none">
-        <div className="p-6 border-b border-gray-100 flex items-center justify-between">
+        <div className="p-4 sm:p-6 border-b border-gray-100 flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2 className="text-lg font-semibold text-teal-deep">Policy Library</h2>
             <p className="text-sm text-slate mt-1">{policies.length} policies in knowledge base</p>
           </div>
-          <label className={`px-4 py-2.5 rounded-lg cursor-pointer transition-colors text-sm font-medium flex items-center space-x-2 ${
-            isUploading 
-              ? 'bg-gray-400 cursor-not-allowed' 
-              : 'bg-teal-primary text-white hover:bg-ocean-deep'
-          }`}>
-            <Icon name={isUploading ? 'cog' : 'plus'} size={16} className={isUploading ? 'animate-spin' : ''} />
+          <label
+            className={`shrink-0 px-4 py-2.5 rounded-lg cursor-pointer transition-colors text-sm font-medium flex items-center space-x-2 ${
+              isUploading
+                ? 'bg-gray-400 cursor-not-allowed'
+                : 'bg-teal-primary text-white hover:bg-ocean-deep'
+            }`}
+          >
+            <Icon
+              name={isUploading ? 'cog' : 'plus'}
+              size={16}
+              className={isUploading ? 'animate-spin' : ''}
+            />
             <span>{isUploading ? 'Processing...' : 'Upload New Policy'}</span>
             <input
               type="file"
@@ -221,19 +251,18 @@ const PoliciesPage: React.FC<IPoliciesPageProps> = ({
                 <Icon name="document-text" size={32} className="text-teal-primary" />
               </div>
               <div className="text-lg font-medium text-teal-deep">No policies yet</div>
-              <div className="text-sm text-slate mt-1">Upload your first policy document to get started</div>
+              <div className="text-sm text-slate mt-1">
+                Upload your first policy document to get started
+              </div>
             </div>
           ) : (
             policies.map((policy) => (
-              <div key={policy.id} className="p-6 hover:bg-smoke transition-colors">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
+              <div key={policy.id} className="p-4 sm:p-6 hover:bg-smoke transition-colors">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="flex-1 min-w-0">
                     <div className="flex items-center space-x-3 mb-2">
                       <h3 className="text-sm font-medium text-teal-deep">{policy.title}</h3>
-                      <Badge
-                        variant={policy.active ? 'success' : 'warning'}
-                        size="sm"
-                      >
+                      <Badge variant={policy.active ? 'success' : 'warning'} size="sm">
                         {policy.active ? 'ACTIVE' : 'INACTIVE'}
                       </Badge>
                     </div>
@@ -246,12 +275,8 @@ const PoliciesPage: React.FC<IPoliciesPageProps> = ({
                       <span>{new Date(policy.createdAt).toLocaleDateString()}</span>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-2 ml-4">
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => handleEdit(policy)}
-                    >
+                  <div className="flex flex-wrap items-center gap-2 shrink-0">
+                    <Button variant="secondary" size="sm" onClick={() => handleEdit(policy)}>
                       <Icon name="pencil" size={14} className="mr-1" />
                       Edit
                     </Button>
@@ -327,7 +352,7 @@ const PoliciesPage: React.FC<IPoliciesPageProps> = ({
                   <Icon name="x-circle" size={20} />
                 </button>
               </div>
-              
+
               <div className="space-y-4">
                 <Input
                   label="Title"
@@ -335,18 +360,18 @@ const PoliciesPage: React.FC<IPoliciesPageProps> = ({
                   onChange={(e) => setEditTitle(e.target.value)}
                   fullWidth
                 />
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-teal-deep mb-2">
-                    Category
-                  </label>
+                  <label className="block text-sm font-medium text-teal-deep mb-2">Category</label>
                   <select
                     value={editCategory}
                     onChange={(e) => setEditCategory(e.target.value)}
                     className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:border-teal-primary focus:ring-2 focus:ring-teal-primary/20 outline-none transition-all"
                   >
                     {CATEGORIES.map((cat) => (
-                      <option key={cat} value={cat}>{cat.replace('_', ' ')}</option>
+                      <option key={cat} value={cat}>
+                        {cat.replace('_', ' ')}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -373,7 +398,7 @@ const PoliciesPage: React.FC<IPoliciesPageProps> = ({
         </div>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default PoliciesPage;
+export default PoliciesPage

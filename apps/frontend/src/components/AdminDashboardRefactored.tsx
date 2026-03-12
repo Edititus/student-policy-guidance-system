@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import React, { useMemo, useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 import {
   useAnalytics,
   useAdminStats,
@@ -10,55 +10,73 @@ import {
   useRespondToQuery,
   useDismissQuery,
   useDeleteQuery,
-} from '../hooks/useAdmin';
-import { useActivatePolicy, useDeactivatePolicy, useDeletePolicy, usePolicies, useUpdatePolicy, useUploadPolicy } from '../hooks/usePolicies';
-import { AdminHeader, AdminSidebar } from './organisms';
-import { AnalyticsPage, OverviewPage, PoliciesPage, QueriesPage, StudentsPage } from '../pages/admin';
-import type { AdminTab } from '../types';
-import { policiesApi } from '../api/client';
-import { useAuth } from '../context/AuthContext';
+} from '../hooks/useAdmin'
+import {
+  useActivatePolicy,
+  useDeactivatePolicy,
+  useDeletePolicy,
+  usePolicies,
+  useUpdatePolicy,
+  useUploadPolicy,
+} from '../hooks/usePolicies'
+import { AdminHeader, AdminSidebar } from './organisms'
+import {
+  AnalyticsPage,
+  OverviewPage,
+  PoliciesPage,
+  QueriesPage,
+  StudentsPage,
+} from '../pages/admin'
+import type { AdminTab } from '../types'
+import { policiesApi } from '../api/client'
+import { useAuth } from '../context/AuthContext'
 
-const ALLOWED_TABS: AdminTab[] = ['overview', 'queries', 'students', 'policies', 'analytics'];
+const ALLOWED_TABS: AdminTab[] = ['overview', 'queries', 'students', 'policies', 'analytics']
 
 function coerceTab(value?: string): AdminTab {
-  return ALLOWED_TABS.includes(value as AdminTab) ? (value as AdminTab) : 'overview';
+  return ALLOWED_TABS.includes(value as AdminTab) ? (value as AdminTab) : 'overview'
 }
 
 const AdminDashboardRefactored: React.FC = () => {
-  const navigate = useNavigate();
-  const { tab } = useParams<{ tab: string }>();
-  const activeTab = coerceTab(tab);
-  const { user } = useAuth();
+  const navigate = useNavigate()
+  const { tab } = useParams<{ tab: string }>()
+  const activeTab = coerceTab(tab)
+  const { user } = useAuth()
 
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState(0)
   const [uploadStatus, setUploadStatus] = useState<{
-    progress: number;
-    stage: 'idle' | 'uploading' | 'parsing' | 'processing' | 'complete' | 'error';
-    message: string;
-    fileName?: string;
+    progress: number
+    stage: 'idle' | 'uploading' | 'parsing' | 'processing' | 'complete' | 'error'
+    message: string
+    fileName?: string
   }>({
     progress: 0,
     stage: 'idle',
     message: '',
-  });
+  })
 
-  const { data: statsData, isLoading: statsLoading, refetch: refetchStats } = useAdminStats();
-  const { data: escalatedData, isLoading: escalatedLoading, refetch: refetchEscalated } = useEscalatedQueries({ includeResponded: true });
-  const { data: policiesData, isLoading: policiesLoading, refetch: refetchPolicies } = usePolicies();
-  const { data: analyticsData, isLoading: analyticsLoading } = useAnalytics('week');
-  const { data: activityData, isLoading: activityLoading } = useRecentActivity(10);
-  const { data: coverageGapData, isLoading: coverageGapLoading } = useCoverageGaps(10);
+  const { data: statsData, isLoading: statsLoading, refetch: refetchStats } = useAdminStats()
+  const {
+    data: escalatedData,
+    isLoading: escalatedLoading,
+    refetch: refetchEscalated,
+  } = useEscalatedQueries({ includeResponded: true })
+  const { data: policiesData, isLoading: policiesLoading, refetch: refetchPolicies } = usePolicies()
+  const { data: analyticsData, isLoading: analyticsLoading } = useAnalytics('week')
+  const { data: activityData, isLoading: activityLoading } = useRecentActivity(10)
+  const { data: coverageGapData, isLoading: coverageGapLoading } = useCoverageGaps(10)
 
-  const respondMutation = useRespondToQuery();
-  const dismissMutation = useDismissQuery();
-  const deleteQueryMutation = useDeleteQuery();
-  const exportMutation = useExportData();
-  const uploadMutation = useUploadPolicy();
-  const activateMutation = useActivatePolicy();
-  const deactivateMutation = useDeactivatePolicy();
-  const updateMutation = useUpdatePolicy();
-  const deleteMutation = useDeletePolicy();
+  const respondMutation = useRespondToQuery()
+  const dismissMutation = useDismissQuery()
+  const deleteQueryMutation = useDeleteQuery()
+  const exportMutation = useExportData()
+  const uploadMutation = useUploadPolicy()
+  const activateMutation = useActivatePolicy()
+  const deactivateMutation = useDeactivatePolicy()
+  const updateMutation = useUpdatePolicy()
+  const deleteMutation = useDeletePolicy()
 
   const stats = statsData?.data || {
     totalQueries: 0,
@@ -68,21 +86,21 @@ const AdminDashboardRefactored: React.FC = () => {
     uniqueStudents: 0,
     totalPolicies: 0,
     totalUsers: 0,
-  };
+  }
 
-  const escalatedQueries = escalatedData?.data || [];
+  const escalatedQueries = escalatedData?.data || []
 
   // Only pending/in_review items count as "needing attention".
   // Dismissed and responded queries must NOT inflate the badge or Overview count.
   const pendingEscalatedQueries = escalatedQueries.filter((q) => {
-    const status = q.escalationStatus ?? (q.responded ? 'resolved' : 'pending');
-    return status === 'pending' || status === 'in_review';
-  });
+    const status = q.escalationStatus ?? (q.responded ? 'resolved' : 'pending')
+    return status === 'pending' || status === 'in_review'
+  })
 
-  const policies = policiesData?.data || [];
-  const analytics = analyticsData?.data || null;
-  const recentActivity = activityData?.data || [];
-  const coverageGaps = coverageGapData?.data || [];
+  const policies = policiesData?.data || []
+  const analytics = analyticsData?.data || null
+  const recentActivity = activityData?.data || []
+  const coverageGaps = coverageGapData?.data || []
 
   const isLoading = useMemo(
     () =>
@@ -92,77 +110,84 @@ const AdminDashboardRefactored: React.FC = () => {
       activityLoading ||
       analyticsLoading ||
       coverageGapLoading,
-    [statsLoading, escalatedLoading, policiesLoading, activityLoading, analyticsLoading, coverageGapLoading]
-  );
+    [
+      statsLoading,
+      escalatedLoading,
+      policiesLoading,
+      activityLoading,
+      analyticsLoading,
+      coverageGapLoading,
+    ]
+  )
 
   const onTabChange = (nextTab: AdminTab) => {
-    navigate(`/admin/${nextTab}`);
-  };
+    navigate(`/admin/${nextTab}`)
+  }
 
   const onRefresh = () => {
-    refetchStats();
-    refetchEscalated();
-    refetchPolicies();
-  };
+    refetchStats()
+    refetchEscalated()
+    refetchPolicies()
+  }
 
   const onFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+    const file = event.target.files?.[0]
+    if (!file) return
 
-    const formData = new FormData();
-    formData.append('file', file);
+    const formData = new FormData()
+    formData.append('file', file)
     if (user?.schoolId) {
-      formData.append('schoolId', user.schoolId);
+      formData.append('schoolId', user.schoolId)
     }
 
-    setUploadProgress(10);
+    setUploadProgress(10)
     setUploadStatus({
       progress: 10,
       stage: 'uploading',
       message: 'Uploading document',
       fileName: file.name,
-    });
+    })
 
     try {
-      const response = await uploadMutation.mutateAsync(formData);
-      const jobId = response?.data?.jobId;
+      const response = await uploadMutation.mutateAsync(formData)
+      const jobId = response?.data?.jobId
 
-      setUploadProgress(30);
+      setUploadProgress(30)
       setUploadStatus({
         progress: 30,
         stage: 'parsing',
         message: 'Parsing and structuring policy',
         fileName: file.name,
-      });
+      })
 
       if (!jobId) {
-        setUploadProgress(100);
+        setUploadProgress(100)
         setUploadStatus({
           progress: 100,
           stage: 'complete',
           message: 'Upload complete',
           fileName: file.name,
-        });
-        return;
+        })
+        return
       }
 
-      let localProgress = 30;
-      let done = false;
+      let localProgress = 30
+      let done = false
       for (let attempts = 0; attempts < 300 && !done; attempts++) {
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        let status;
+        await new Promise((resolve) => setTimeout(resolve, 1000))
+        let status
         try {
-          status = await policiesApi.getProcessingStatus(jobId);
+          status = await policiesApi.getProcessingStatus(jobId)
         } catch {
-          continue;
+          continue
         }
-        const job = status?.data;
-        if (!job || typeof job !== 'object') continue;
+        const job = status?.data
+        if (!job || typeof job !== 'object') continue
         const typedJob = job as {
-          progress?: number;
-          status?: string;
-          error?: string;
-        };
+          progress?: number
+          status?: string
+          error?: string
+        }
         const stage =
           typedJob.status === 'embedding'
             ? 'processing'
@@ -172,10 +197,10 @@ const AdminDashboardRefactored: React.FC = () => {
                 ? 'complete'
                 : typedJob.status === 'error'
                   ? 'error'
-                  : 'uploading';
-        const newProgress = Math.max(typedJob.progress || 0, localProgress);
-        localProgress = newProgress;
-        setUploadProgress(newProgress);
+                  : 'uploading'
+        const newProgress = Math.max(typedJob.progress || 0, localProgress)
+        localProgress = newProgress
+        setUploadProgress(newProgress)
         setUploadStatus({
           progress: newProgress,
           stage,
@@ -188,32 +213,37 @@ const AdminDashboardRefactored: React.FC = () => {
                   ? `Embedding chunks… ${typedJob.progress || 50}%`
                   : 'Processing policy',
           fileName: file.name,
-        });
+        })
 
         if (typedJob.status === 'complete' || typedJob.status === 'error') {
-          done = true;
+          done = true
         }
       }
 
-      onRefresh();
+      onRefresh()
     } catch (error) {
       setUploadStatus({
         progress: uploadProgress || 0,
         stage: 'error',
         message: error instanceof Error ? error.message : 'Upload failed',
         fileName: file.name,
-      });
+      })
     }
-  };
+  }
 
   return (
     <div className="min-h-screen bg-smoke flex">
       <AdminSidebar
         activeTab={activeTab}
-        onTabChange={onTabChange}
+        onTabChange={(tab) => {
+          onTabChange(tab)
+          setMobileSidebarOpen(false)
+        }}
         collapsed={sidebarCollapsed}
         onToggleCollapse={() => setSidebarCollapsed((v) => !v)}
         escalationCount={pendingEscalatedQueries.length}
+        mobileOpen={mobileSidebarOpen}
+        onMobileClose={() => setMobileSidebarOpen(false)}
       />
       <div className="flex-1 min-w-0">
         <AdminHeader
@@ -222,6 +252,7 @@ const AdminDashboardRefactored: React.FC = () => {
           adminName={user?.name || user?.email || 'Admin'}
           adminEmail={user?.email || ''}
           adminSchool={user?.schoolId || ''}
+          onMobileMenuOpen={() => setMobileSidebarOpen(true)}
         />
         <main className="p-6 md:p-8">
           {activeTab === 'overview' && (
@@ -239,7 +270,9 @@ const AdminDashboardRefactored: React.FC = () => {
             <QueriesPage
               queries={escalatedQueries}
               isLoading={escalatedLoading}
-              onRespond={(queryId, response) => respondMutation.mutateAsync({ queryId, response }).then(() => {})}
+              onRespond={(queryId, response) =>
+                respondMutation.mutateAsync({ queryId, response }).then(() => {})
+              }
               onDismiss={(queryId) => dismissMutation.mutateAsync(queryId).then(() => {})}
               onDelete={(queryId) => deleteQueryMutation.mutateAsync(queryId).then(() => {})}
               isResponding={respondMutation.isPending}
@@ -253,8 +286,12 @@ const AdminDashboardRefactored: React.FC = () => {
               isLoading={policiesLoading}
               onFileUpload={onFileUpload}
               onActivatePolicy={(policyId) => activateMutation.mutateAsync(policyId).then(() => {})}
-              onDeactivatePolicy={(policyId) => deactivateMutation.mutateAsync(policyId).then(() => {})}
-              onUpdatePolicy={(policyId, data) => updateMutation.mutateAsync({ id: policyId, data }).then(() => {})}
+              onDeactivatePolicy={(policyId) =>
+                deactivateMutation.mutateAsync(policyId).then(() => {})
+              }
+              onUpdatePolicy={(policyId, data) =>
+                updateMutation.mutateAsync({ id: policyId, data }).then(() => {})
+              }
               onDeletePolicy={(policyId) => deleteMutation.mutateAsync(policyId).then(() => {})}
               isUploading={uploadMutation.isPending}
               uploadStatus={uploadStatus}
@@ -269,13 +306,11 @@ const AdminDashboardRefactored: React.FC = () => {
               isExporting={exportMutation.isPending}
             />
           )}
-          {activeTab === 'students' && (
-            <StudentsPage />
-          )}
+          {activeTab === 'students' && <StudentsPage />}
         </main>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default AdminDashboardRefactored;
+export default AdminDashboardRefactored
